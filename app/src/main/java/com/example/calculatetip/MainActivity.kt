@@ -1,5 +1,6 @@
 package com.example.calculatetip
 
+import android.annotation.SuppressLint
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -11,6 +12,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
@@ -18,9 +20,14 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.calculatetip.ui.theme.CalculateTipTheme
@@ -42,6 +49,11 @@ class MainActivity : ComponentActivity() {
 
 @Composable
 fun TipScreen() {
+    var amountUserInput by remember { mutableStateOf("")}
+
+    val amountValue = amountUserInput.toDoubleOrNull() ?: 0.0
+    val tip = calculateTip(amountValue)
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -56,26 +68,30 @@ fun TipScreen() {
                 .padding(bottom = 16.dp, top = 40.dp)
                 .align(alignment = Alignment.Start)
         )
-        AmountField(modifier = Modifier.padding(bottom = 32.dp).fillMaxSize())
+        AmountField(amountUserInput, onValueChange = {amountUserInput = it}, modifier = Modifier.padding(bottom = 32.dp).fillMaxSize())
         Text(
-            text = stringResource(R.string.tip_amount, "$0.00"),
+            text = stringResource(R.string.tip_amount, tip),
             style = MaterialTheme.typography.displaySmall
         )
         Spacer(modifier = Modifier.height(150.dp))
     }
 }
 
-fun calculateTip(amount: Double, tipPercent:Double = 15.0): String {
+fun calculateTip(amount: Double, tipPercent: Double = 15.0): String {
     val tip = amount * (tipPercent / 100)
     return NumberFormat.getCurrencyInstance().format(tip)
 }
 
 @Composable
-fun AmountField(modifier: Modifier = Modifier) {
+fun AmountField(value: String, onValueChange: (String) -> Unit,modifier: Modifier = Modifier) {
+
     TextField(
-        value = "",
-        onValueChange = {},
-        modifier = modifier
+        value = value,
+        onValueChange = onValueChange,
+        modifier = modifier,
+        label = {Text(stringResource(R.string.bill_amount))},
+        singleLine = true,
+        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
     )
 }
 
